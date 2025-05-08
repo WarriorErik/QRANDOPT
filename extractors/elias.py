@@ -1,35 +1,48 @@
-"""
-elias.py
-Elias–Wagner randomness extractor (variable block size
-
-"""
 import math
 from typing import List
 
 def elias(bits: List[int]) -> List[int]:
     """
-    Elias extractor (Ann. Math. Stat., 1972):
-      1. While |S| > 1, let n = |S|, k = floor(log2 n), L = 2**k.
-      2. Read first k bits as integer x.
-      3. If x < 2**k - (n - L): emit x in k-bit form.
-      4. Remove those k bits from S and repeat.
+    Corrected Elias–Wagner extractor:
+       Let m = len(bits). While m > 1:
+       k = floor(log2 m), t = 2**(k+1) - m.
+      Read the first k+1 bits and form integer y.
+      If y < t*2:  (i.e. y < 2*t)
+            Drop the first k bits (no output).
+         Else:
+           Compute z = y - 2*t  (range [0 .. 2**(k+1)-2*t -1]).
+           Output the lower k bits of z.
+           Drop the first k+1 bits.
+      5.   Update m = len(bits) and repeat.
     """
     out: List[int] = []
-    S = bits[:]  
-    while True:
-        n = len(S)
-        if n <= 1:
+    S = bits[:]
+    while len(S) > 1:
+        m = len(S)
+        k = math.floor(math.log2(m))
+        # Number of values we'd have to discard if we just used k bits
+        t = (1 << (k+1)) - m
+        
+        # Need k+1 bits for the test
+        if len(S) < k+1:
             break
-        k = math.floor(math.log2(n))
-        L = 1 << k
-        discard = n - L
-        # read k bits -> x
-        x = 0
-        for bit in S[:k]:
-            x = (x << 1) | bit
-        S = S[k:]
-        if x < (L - discard):
-            # emit k-bit big-endian of x
+        
+        # Read k+1 bits as integer y
+        y = 0
+        for b in S[:k+1]:
+            y = (y << 1) | b
+        
+        if y < 2*t:
+            # reject case: drop first k bits only
+            S = S[k:]
+        else:
+            # accept case: produce output
+            z = y - 2*t
+            # take lower k bits of z
             for shift in range(k-1, -1, -1):
-                out.append((x >> shift) & 1)
+                out.append((z >> shift) & 1)
+            # drop k+1 bits
+            S = S[k+1:]
     return out
+
+
