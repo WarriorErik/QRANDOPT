@@ -1,0 +1,1 @@
+C:/Users/ereci/OneDrive/Desktop/QRANDOPT/QRANDOPT/extractors/maurer_wolf.py
