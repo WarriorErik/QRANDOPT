@@ -1,10 +1,10 @@
-# dashboard.py
-
 import sys
 import os
 from math import sqrt
 
-
+# ──────────────────────────────────────────────────────────────────────────────
+# Pointing to the repo root (one level up from this file) is on sys.path
+# ──────────────────────────────────────────────────────────────────────────────
 this_dir  = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.abspath(os.path.join(this_dir, os.pardir))
 if repo_root not in sys.path:
@@ -31,6 +31,7 @@ from extractors.elias          import elias
 from extractors.universal_hash import universal_hash
 from extractors.maurer_wolf    import maurer_wolf_extractor
 from utils                     import compute_bias
+
 
 
 # NIST SP 800-22 functions
