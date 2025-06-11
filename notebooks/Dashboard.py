@@ -4,12 +4,11 @@ import sys
 import os
 from math import sqrt
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Ensuring that the project root is on sys.path for local module imports
-# ──────────────────────────────────────────────────────────────────────────────
-project_root = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+
+this_dir  = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.abspath(os.path.join(this_dir, os.pardir))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
 
 import streamlit as st
 import numpy as np
@@ -32,6 +31,7 @@ from extractors.elias          import elias
 from extractors.universal_hash import universal_hash
 from extractors.maurer_wolf    import maurer_wolf_extractor
 from utils                     import compute_bias
+
 
 # NIST SP 800-22 functions
 from nistrng import (
@@ -301,7 +301,7 @@ st.set_page_config(
 st.title("🔬 QRANDOPT: Quantum/Classical Entropy Dashboard")
 st.markdown(
     """
-    Welcome!This dashboard is designed to prove your thesis with unprecedented interactivity.  
+    Welcome!  
     Below you’ll find two main tabs:
 
     1. 🧮 Classical Extractor Metrics
