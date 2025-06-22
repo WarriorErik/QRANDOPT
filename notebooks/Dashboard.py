@@ -28,6 +28,7 @@ from gym import spaces
 
 from qiskit_aer import AerSimulator
 from qiskit import QuantumCircuit
+from qiskit_aer.noise import NoiseModel, pauli_error
 
 
 # Classical extractors and utilities
@@ -203,6 +204,21 @@ def generate_quantum_bits(num_bits: int, batch_size: int = 256) -> list[int]:
     if len(drand_bits) >= num_bits:
         return drand_bits[:num_bits]
     return generate_aer_bits(num_bits, batch_size)
+
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Noisy bit‐generation helper using Kraus bit‐flip channel
+# ──────────────────────────────────────────────────────────────────────────────
+def apply_bit_flip_noise(bits: list[int], p: float) -> list[int]:
+    """
+    Independently flip each bit with probability p.
+    This is the Kraus bit‐flip channel on a classical bitstream.
+    """
+    flips = np.random.rand(len(bits)) < p
+    # XOR each bit with the flip mask
+    return [b ^ int(f) for b, f in zip(bits, flips)]
+
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -443,6 +459,13 @@ min_length_for_sp = st.sidebar.slider(
     min_value=100, max_value=10_000, value=1_000, step=100
 )
 
+noise_p = st.sidebar.slider(
+    "🔊 Bit‐flip noise probability",
+    0.0, 0.5, 0.0, 0.01,
+    help="Apply a bit‐flip channel (Kraus) before extraction"
+)
+
+
 if "live_buffer" not in st.session_state:
     st.session_state.live_buffer = []
 
@@ -515,6 +538,15 @@ with tab1:
     else:
         raw_bits = None
         source_label = None
+
+        if raw_bits is not None:
+        # ──────────────────────────────────────────────────────────────
+        #  Inject Kraus bit‐flip noise if requested
+        # ──────────────────────────────────────────────────────────────
+            if noise_p > 0:
+                raw_bits = apply_bit_flip_noise(raw_bits, noise_p)
+                source_label += f" + noise(p={noise_p:.2f})"
+
 
     if raw_bits is not None:
         raw_bias = compute_bias(raw_bits)
@@ -913,6 +945,52 @@ with tab1:
 
         st.markdown("---")
 
+
+    #─────────────────────────────────────────────────
+    # Kraus Simulation Noise‐Sweep Benchmark
+    # ─────────────────────────────────────────────────
+    st.subheader("🎯 Noise‐Sweep Benchmark")
+    sweep = st.multiselect(
+        "Noise probabilities to test",
+        options=[0.0, 0.01, 0.05, 0.1, 0.2],
+        default=[0.0, 0.05, 0.1]
+    )
+    if st.button("🔄 Run Noise Sweep"):
+        rows = []
+        for p in sweep:
+            # get a fresh stream and apply noise
+            bits_s = generate_quantum_bits(num_bits, batch_size)
+            if p > 0:
+                bits_s = apply_bit_flip_noise(bits_s, p)
+
+            for name, func in [
+                ("Von Neumann", von_neumann),
+                ("Elias", elias),
+                ("Universal Hash", lambda b: 
+                    (universal_hash(b, seed="seed") 
+                     if isinstance(universal_hash(b, seed="seed"), list)
+                     else ExtractorEnv._bytes_to_bits(universal_hash(b, seed="seed")))
+                ),
+                ("Maurer‐Wolf", lambda b:
+                    ExtractorEnv._bytes_to_bits(
+                        maurer_wolf_extractor(
+                            ExtractorEnv._bits_to_bytes(b),
+                            seed=b"seed",
+                            output_len=len(b)//2
+                        )
+                    )
+                ),
+            ]:
+                out = func(bits_s)
+                _, _, pr = nist_pass_rate(out) if len(out) >= min_length_for_sp else (0,0,0.0)
+                rows.append({"Extractor": name, "p_flip": p, "PassRate": pr})
+
+        df_sweep = pd.DataFrame(rows)
+        pivot = df_sweep.pivot(index="p_flip", columns="Extractor", values="PassRate")
+        st.dataframe(pivot)
+        st.line_chart(pivot)
+
+
         # “How to create your own bitstream” Tutorial
         st.subheader("📜 How to Create Your Own Bitstream")
         with st.expander("Show me Python & Shell code examples", expanded=False):
@@ -965,6 +1043,8 @@ with tab1:
 
     else:
         st.info("▶️ Generate or upload a bitstream to begin analysis.")
+
+    
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1242,9 +1322,9 @@ with tab3:
 
         #1) Simple Linear  
         Minimize  
-        \[
+        
           H(x) = x_0 + x_1 + x_2
-        \]  
+         
         JSON:
         
         {
@@ -1259,9 +1339,9 @@ with tab3:
 
         ### 2) Pairwise Interaction (Max-Cut on 3 nodes)  
         Minimize (negative edge weights so maximizing cuts)  
-        \[
-          H(x) = -\bigl(x_0 x_1 + x_1 x_2 + x_0 x_2\bigr)
-        \]  
+        
+          H(x) = -(x_0 x_1 + x_1 x_2 + x_0 x_2
+         
         JSON:
         
         {
@@ -1276,10 +1356,10 @@ with tab3:
 
         #3) Mixed Linear & Quadratic  
         Minimize  
-        \[
-          H(x) = 2\,x_0 - 3\,x_1^2 + x_0 x_2
-        \]  
-        (Here \(x_1^2 = x_1\) since \(x_1\in\{0,1\}\).)  
+        
+          H(x) = 2x_0 - 3x_1^2 + x_0 x_2
+          
+        (Here (x_1^2 = x_1) since (x_1 is in{0,1}).)  
         JSON:
         {
           "coefficients": [2, -3, 1],
@@ -1293,7 +1373,7 @@ with tab3:
         """)
 
 
-    # 1) User inputs
+    # User inputs
     poly_json = st.text_area(
         "Polynomial JSON (coeffs & exponent-vectors):",
         height=120,
@@ -1359,7 +1439,7 @@ with tab3:
         result_ph = st.empty()
 
         # ────────────────────────────────────────────────────────────
-        # 1) Upload
+        # Upload
         # ────────────────────────────────────────────────────────────
         t0 = time.time()
         with st.spinner("Uploading polynomial…"):
@@ -1368,7 +1448,7 @@ with tab3:
         upload_ph.success(f"✔ Uploaded in {time.time()-t0:.1f}s (file_id={file_id})")
 
         # ────────────────────────────────────────────────────────────
-        # 2) Submit
+        # Submit
         # ────────────────────────────────────────────────────────────
         t1 = time.time()
         with st.spinner("Submitting job…"):
@@ -1386,7 +1466,7 @@ with tab3:
         submit_ph.success(f"✔ Submitted in {time.time()-t1:.1f}s (job_id={job_id})")
 
         # ────────────────────────────────────────────────────────────
-        # 3) Poll
+        # Poll
         # ────────────────────────────────────────────────────────────
         t2 = time.time()
         with st.spinner("Polling status…"):
@@ -1402,7 +1482,7 @@ with tab3:
         poll_ph.success(f"✔ Completed in {time.time()-t2:.1f}s")
 
         # ────────────────────────────────────────────────────────────
-        # 4) Fetch & Display
+        # Fetch & Display
         # ────────────────────────────────────────────────────────────
         t3     = time.time()
         result = qci.get_job_results(job_id=job_id)
