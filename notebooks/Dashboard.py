@@ -1,6 +1,10 @@
 import sys
 import os
 from math import sqrt
+import scipy.sparse as sp
+from scipy.sparse import dok_matrix
+from qci_client.optimization.enum import DeviceType
+import time
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Pointing to the repo root (one level up from this file) is on sys.path
@@ -25,6 +29,7 @@ from gym import spaces
 from qiskit_aer import AerSimulator
 from qiskit import QuantumCircuit
 
+
 # Classical extractors and utilities
 from extractors.von_neumann    import von_neumann
 from extractors.elias          import elias
@@ -40,6 +45,101 @@ from nistrng import (
     check_eligibility_all_battery,
     run_all_battery
 )
+
+from qci_client import QciClient
+import json
+qci = QciClient(
+ url="https://api.qci-prod.com",
+api_token="867dda8f2d356ac12fe0851f8e92e56b"
+)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Helpers for Dirac-3 integer solver via polynomial upload
+# ──────────────────────────────────────────────────────────────────────────────
+# @st.cache_data(show_spinner=False)
+# def upload_polynomial_file(
+#     coeffs: list[float],
+#     exp_counts: list[list[int]],
+#     num_vars: int
+# ) -> str:
+#     """
+#     Upload the polynomial in the exact REST schema Dirac-3 expects:
+#       - num_variables: number of xi’s
+#       - min_degree / max_degree: min/max of sum(exp_counts)
+#       - data: list of {idx: [...], val: coef}, where idx is zero-padded
+#     """
+#     # compute total degree per term
+#     degrees = [sum(v) for v in exp_counts]
+#     min_deg, max_deg = min(degrees), max(degrees)
+
+#     # build the QCI‐style data list
+#     data = []
+#     for coef, vec in zip(coeffs, exp_counts):
+#         # repeat (j+1) p_j times
+#         flat = []
+#         for j, p in enumerate(vec):
+#             flat += [j + 1] * p
+#         # pad with leading zeros to length=max_deg
+#         pad = [0] * (max_deg - len(flat))
+#         idx_list = pad + flat
+#         data.append({"idx": idx_list, "val": coef})
+
+#     file_body = {
+#         "file_name": "user_polynomial",
+#         "file_config": {
+#             "polynomial": {
+#                 "num_variables": num_vars,
+#                 "min_degree":    min_deg,
+#                 "max_degree":    max_deg,
+#                 "data":          data
+#             }
+#         }
+#     }
+#     resp = qci.upload_file(file=file_body)
+#     return resp["file_id"]
+
+
+# def submit_and_poll(
+#     poly_file_id: str,
+#     shots: int,
+#     poll_interval: float = 2.0
+# ) -> dict:
+#     """
+#     1) Submit a SAMPLE_HAMILTONIAN_INTEGER job  
+#     2) Poll until status == COMPLETED/FAILED  
+#     3) Return the final results dict
+#     """
+#     body = qci.build_job_body(
+#         job_type="sample-hamiltonian-integer",
+#         job_params={
+#             "device_type": DeviceType.DIRAC3_QUDIT.value,
+#             "num_samples": shots,
+#             "num_levels":   [2],
+#         },
+#         polynomial_file_id=poly_file_id
+#     )
+
+#     # submit
+#     submit_resp = qci.submit_job(job_body=body)
+#     job_id = submit_resp["job_id"]
+
+#     # poll
+#     while True:
+#         status = qci.get_job_status(job_id=job_id)["status"]
+#         if status == "COMPLETED":
+#             break
+#         if status in ("FAILED", "CANCELLED"):
+#             raise RuntimeError(f"Dirac-3 job {job_id} ended with status {status}")
+#         time.sleep(poll_interval)
+
+#     # fetch results
+#     result = qci.get_job_results(job_id=job_id)
+#     return result
+
+
+
+
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Ensure a 1,000‐bit "sample_bitstream.txt" exists alongside dashboard.py
@@ -317,6 +417,8 @@ st.markdown(
        - Train episode‐by‐episode with a live progress bar.  
        - View learning curve and a 3D Q‐table heatmap.  
        - Compare RL output to classical extractors side by side.  
+
+    3. ✨ Quantum Optimizer (Dirac-3)
     """
 )
 
@@ -353,7 +455,7 @@ if "raw_bits" not in st.session_state:
 if "q_table" not in st.session_state:
     st.session_state.q_table = None
 
-tab1, tab2 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor"])
+tab1, tab2, tab3 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor", "👨‍🔬 Quantum Optimizer"])
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -866,7 +968,7 @@ with tab1:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# TMeta-RL Extractor
+# Meta-RL Extractor
 # ──────────────────────────────────────────────────────────────────────────────
 with tab2:
     st.header("🤖 Meta-RL Extractor (Q-Learning)")
@@ -1088,7 +1190,259 @@ with tab2:
     else:
         st.info("▶️ Click the button above to train the Meta-RL agent.")
 
+#___________________________________________________________________________
+#Quantum Optimization Tab using the Dirac Hardware Model
+#____________________________________________________________________________
 
+
+
+
+
+with tab3:
+    st.header("✨ Quantum Optimizer (Dirac-3)")
+
+    with st.expander("❓ What is this tab and why it matters to QRANDOPT", expanded=True):
+        st.markdown(
+            """
+            Overview  
+            In this tab, we take your polynomial Hamiltonian (a cost function over binary variables)  
+            and run it on Quantum Computing Inc.’s Dirac-3 qudit optimizer.  
+
+            What it does  
+            1. Uploads your polynomial (coeffs  exponent vectors) to the QCI REST API.  
+            2. Submits a `sample-hamiltonian-integer` job targeting the Dirac-3 device.  
+            3. Polls the job until completion, then retrieves samples of bit-strings and their energies.  
+            4. Displays:  
+               - The minimum (best) energy found  
+               - The corresponding optimal bit-assignment  
+               - A histogram of energies over all shots  
+               - A table of every unique solution, its energy, and frequency  
+
+            Why this matters for QRANDOPT 
+            - Demonstrates how a quantum optimizer can be integrated _side-by-side_ with  
+              classical extractors and meta-RL agents.  
+            - Provides a concrete, hands-on example of leveraging real quantum hardware (qudits)  
+              to solve discrete optimization problems arising in entropy-extraction workflows.  
+            - Offers performance data (success‐rate, solution quality) for comparison against your  
+              classical and RL baselines in Chapters 3–5 of your thesis.  
+            """
+        )
+
+
+
+    with st.expander("🧑‍🏫 Quick Tutorial & Example Equations", expanded=True):
+        st.markdown("""
+        How to use:  
+        1. Pick one of the example equations below (or write your own).  
+        2. Copy the JSON under the equation and paste it into the Polynomial JSON box.  
+        3. Set Shots and Variables (variables = number of xi’s, e.g. 3).  
+        4. Click ▶️ Run Quantum Optimization and explore the results.
+
+        ————————————————
+
+        #1) Simple Linear  
+        Minimize  
+        \[
+          H(x) = x_0 + x_1 + x_2
+        \]  
+        JSON:
+        
+        {
+          "coefficients": [1, 1, 1],
+          "indices": [
+            [1, 0, 0],   // x₀
+            [0, 1, 0],   // x₁
+            [0, 0, 1]    // x₂
+          ]
+        }
+        
+
+        ### 2) Pairwise Interaction (Max-Cut on 3 nodes)  
+        Minimize (negative edge weights so maximizing cuts)  
+        \[
+          H(x) = -\bigl(x_0 x_1 + x_1 x_2 + x_0 x_2\bigr)
+        \]  
+        JSON:
+        
+        {
+          "coefficients": [-1, -1, -1],
+          "indices": [
+            [1, 1, 0],   // x₀ x₁
+            [0, 1, 1],   // x₁ x₂
+            [1, 0, 1]    // x₀ x₂
+          ]
+        }
+        
+
+        #3) Mixed Linear & Quadratic  
+        Minimize  
+        \[
+          H(x) = 2\,x_0 - 3\,x_1^2 + x_0 x_2
+        \]  
+        (Here \(x_1^2 = x_1\) since \(x_1\in\{0,1\}\).)  
+        JSON:
+        {
+          "coefficients": [2, -3, 1],
+          "indices": [
+            [1, 0, 0],  // 2·x₀
+            [0, 1, 0],  // -3·x₁^2
+            [1, 0, 1]   // 1·(x₀ x₂)
+          ]
+        }
+        
+        """)
+
+
+    # 1) User inputs
+    poly_json = st.text_area(
+        "Polynomial JSON (coeffs & exponent-vectors):",
+        height=120,
+        placeholder='{\"coefficients\":[1,-2,1],\"indices\":[[3,0,0],[0,2,0],[0,0,1]]}'
+    )
+    shots    = st.number_input("Samples (shots)", 1, 10_000, 100, 1)
+    num_vars = st.number_input("Variables",       1,    20,    3,  1)
+
+    if st.button("▶️ Run Quantum Optimization"):
+        # ────────────────────────────────────────────────────────────
+        # Parse & sanitize
+        # ────────────────────────────────────────────────────────────
+        try:
+            spec   = json.loads(poly_json)
+            coeffs = spec["coefficients"]
+            inds   = spec["indices"]
+        except Exception as e:
+            st.error(f"Invalid JSON: {e}")
+            st.stop()
+
+        if not (isinstance(coeffs, list) and isinstance(inds, list) and len(coeffs) == len(inds)):
+            st.error("‘coefficients’ and ‘indices’ must be equally-long lists.")
+            st.stop()
+
+        # strip out any constant (deg=0) terms
+        filtered = [(c,v) for c,v in zip(coeffs,inds) if sum(v)>0]
+        if len(filtered) < len(coeffs):
+            csum = sum(c for c,v in zip(coeffs,inds) if sum(v)==0)
+            st.warning(f"Removed constant offset {csum}; Dirac-3 requires deg≥1.")
+        if not filtered:
+            st.error("No degree≥1 terms left.")
+            st.stop()
+        coeffs, inds = zip(*filtered)
+        coeffs, inds = list(coeffs), list(inds)
+
+        # ────────────────────────────────────────────────────────────
+        # Build the polynomial‐upload payload
+        # ────────────────────────────────────────────────────────────
+        degrees = [sum(v) for v in inds]
+        mn, mx  = min(degrees), max(degrees)
+        data = []
+        for c, vec in zip(coeffs, inds):
+            flat   = [j+1 for j,p in enumerate(vec) for _ in range(p)]
+            pad    = [0] * (mx - len(flat))
+            data.append({"idx": pad + flat, "val": c})
+
+        file_body = {
+            "file_name": "user_polynomial",
+            "file_config": {
+                "polynomial": {
+                    "num_variables": num_vars,
+                    "min_degree":    mn,
+                    "max_degree":    mx,
+                    "data":          data
+                }
+            }
+        }
+
+        # placeholders for live feedback
+        upload_ph = st.empty()
+        submit_ph = st.empty()
+        poll_ph   = st.empty()
+        result_ph = st.empty()
+
+        # ────────────────────────────────────────────────────────────
+        # 1) Upload
+        # ────────────────────────────────────────────────────────────
+        t0 = time.time()
+        with st.spinner("Uploading polynomial…"):
+            resp    = qci.upload_file(file=file_body)
+            file_id = resp["file_id"]
+        upload_ph.success(f"✔ Uploaded in {time.time()-t0:.1f}s (file_id={file_id})")
+
+        # ────────────────────────────────────────────────────────────
+        # 2) Submit
+        # ────────────────────────────────────────────────────────────
+        t1 = time.time()
+        with st.spinner("Submitting job…"):
+            job_body    = qci.build_job_body(
+                job_type="sample-hamiltonian-integer",
+                job_params={
+                    "device_type": DeviceType.DIRAC3_QUDIT.value,
+                    "num_samples": shots,
+                    "num_levels":   [2],
+                },
+                polynomial_file_id=file_id
+            )
+            submit_resp = qci.submit_job(job_body=job_body)
+            job_id      = submit_resp["job_id"]
+        submit_ph.success(f"✔ Submitted in {time.time()-t1:.1f}s (job_id={job_id})")
+
+        # ────────────────────────────────────────────────────────────
+        # 3) Poll
+        # ────────────────────────────────────────────────────────────
+        t2 = time.time()
+        with st.spinner("Polling status…"):
+            while True:
+                status = qci.get_job_status(job_id=job_id)["status"]
+                poll_ph.info(f"Status: {status}")
+                if status == "COMPLETED":
+                    break
+                if status in ("FAILED", "CANCELLED"):
+                    poll_ph.error(f"Job {job_id} {status}")
+                    st.stop()
+                time.sleep(1)
+        poll_ph.success(f"✔ Completed in {time.time()-t2:.1f}s")
+
+        # ────────────────────────────────────────────────────────────
+        # 4) Fetch & Display
+        # ────────────────────────────────────────────────────────────
+        t3     = time.time()
+        result = qci.get_job_results(job_id=job_id)
+        result_ph.success(f"✔ Results retrieved in {time.time()-t3:.1f}s")
+
+        # now pull out the real `results` object
+        res = result.get("results", {})
+
+        counts    = res.get("counts",    [])
+        energies  = res.get("energies",  [])
+        solutions = res.get("solutions", [])
+
+        # Best‐energy metric
+        if energies:
+            best_idx     = int(min(range(len(energies)), key=lambda i: energies[i]))
+            best_energy  = energies[best_idx]
+            best_solution= solutions[best_idx]
+            st.metric("Best Energy",   f"{best_energy:.4f}")
+            st.metric("Best Solution", str(best_solution))
+
+        # Energy histogram
+        if energies:
+            fig = px.histogram(energies, nbins=len(set(energies)), title="Energy Distribution")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Full samples table
+        if solutions:
+            rows = []
+            for sol, ene, cnt in zip(solutions, energies, counts):
+                row = {f"x{j}": sol[j] for j in range(len(sol))}
+                row.update({"energy": ene, "count": cnt})
+                rows.append(row)
+            df = pd.DataFrame(rows)
+            st.subheader("All Samples")
+            st.dataframe(df, use_container_width=True)
+            st.download_button(
+                "⬇️ Download Samples as CSV",
+                df.to_csv(index=False).encode("utf-8"),
+                file_name="qci_samples.csv"
+            )
 # ──────────────────────────────────────────────────────────────────────────────
 # End of dashboard.py
 # ──────────────────────────────────────────────────────────────────────────────
