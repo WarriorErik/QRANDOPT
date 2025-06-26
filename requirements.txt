@@ -1,4 +1,5 @@
 streamlit
+qci_client
 numpy
 pandas
 matplotlib

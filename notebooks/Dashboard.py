@@ -50,8 +50,8 @@ from nistrng import (
 from qci_client import QciClient
 import json
 qci = QciClient(
- url="https://api.qci-prod.com",
-api_token="867dda8f2d356ac12fe0851f8e92e56b"
+ url=st.secrets.qci.url,
+api_token=st.secrets.qci.token,
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -478,7 +478,7 @@ if "raw_bits" not in st.session_state:
 if "q_table" not in st.session_state:
     st.session_state.q_table = None
 
-tab1, tab2, tab3 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor", "👨‍🔬 Quantum Optimizer"])
+tab1, tab2, tab3, tab4 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor", "👨‍🔬 Quantum Optimizer", " 📡QCI Data Analysis"])
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1523,6 +1523,114 @@ with tab3:
                 df.to_csv(index=False).encode("utf-8"),
                 file_name="qci_samples.csv"
             )
+
+
+with tab4:
+    st.header("📡 QCI Data Analysis")
+    st.write("Pull a raw bitstream from QCI, compute entropy metrics, apply every extractor (incl. RL), and run NIST.")
+
+    # Pull from QCI
+    job_id = st.text_input("▶️ Enter QCI Job ID:", "")
+    if not job_id:
+        st.info("Enter a QCI job ID above to begin.")
+        st.stop()
+
+    try:
+        qci_res = qci.get_job_results(job_id=job_id).get("results", {})
+        # flatten all solution bit-streams into one long list
+        raw_bits = [bit for sol in qci_res.get("solutions", []) for bit in sol]
+        st.success(f"✔ Pulled {len(raw_bits)} Qubits from job {job_id}")
+    except Exception as e:
+        st.error(f"Failed to fetch QCI job: {e}")
+        st.stop()
+
+    #  Raw-stream entropy metrics
+    n    = len(raw_bits)
+    p1   = sum(raw_bits) / n
+    p0   = 1 - p1
+    sh   = -(p0*np.log2(p0+1e-9) + p1*np.log2(p1+1e-9))
+    pmax = max(p0, p1)
+    hmin = -np.log2(pmax+1e-9)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total Bits", f"{n:,}")
+    c2.metric("Shannon Entropy", f"{sh:.4f}")
+    c3.metric("Min Entropy", f"{hmin:.4f}")
+    st.markdown("---")
+
+    # NIST on Raw
+    passed, total, pr = nist_pass_rate(raw_bits)
+    st.metric("Raw SP800-22 PassRate", f"{pr:.4f}", delta=f"{passed}/{total}")
+    st.markdown("---")
+
+    # Prepare all extractors
+    extractors = {
+        "Von Neumann": von_neumann,
+        "Elias":       elias,
+        "Universal Hash": lambda b: (
+            universal_hash(b, seed="seed")
+            if isinstance(universal_hash(b, seed="seed"), list)
+            else ExtractorEnv._bytes_to_bits(universal_hash(b, seed="seed"))
+        ),
+        "Maurer–Wolf": lambda b: ExtractorEnv._bytes_to_bits(
+            maurer_wolf_extractor(
+                ExtractorEnv._bits_to_bytes(b),
+                seed=b"seed",
+                output_len=len(b)//2
+            )
+        ),
+    }
+
+    # Quick Meta-RL agent rollout
+    env   = ExtractorEnv(raw_bits, window_size=512)
+    agent = QLearningAgent(env)
+    for ep in range(200):
+        agent.train_one_episode(ep, 200)
+    state, done = env.reset(), False
+    rl_stream = []
+    agent.epsilon = 0.0
+    while not done:
+        a = int(np.argmax(agent.q_table[agent.discretize(state)]))
+        state, _, done, info = env.step(a)
+        rl_stream.extend(info["out_bits"])
+    extractors["Meta-RL"] = lambda _: rl_stream
+
+    # Gather & display per-extractor metrics
+    rows = []
+    for name, fn in extractors.items():
+        out = fn(raw_bits) or []
+        if out:
+            # bias & rate
+            b1   = compute_bias(out)
+            rate = len(out) / n
+            # SP800-22
+            _, _, pr = nist_pass_rate(out) if len(out) >= min_length_for_sp else (0,0,0.0)
+            # Shannon entropy
+            p1_o = sum(out) / len(out)
+            p0_o = 1 - p1_o
+            sh_o   = -(p0_o*np.log2(p0_o+1e-9) + p1_o*np.log2(p1_o+1e-9))
+            # min-entropy
+            hmin_o = -np.log2(max(p0_o, p1_o) + 1e-9)
+        else:
+            b1, rate, pr, sh_o, hmin_o = 0.0, 0.0, 0.0, 0.0, 0.0
+
+        rows.append({
+            "Extractor":       name,
+            "Shannon Entropy": f"{sh_o:.4f}",
+            "Min Entropy":     f"{hmin_o:.4f}",
+            "Post-Bias":       f"{b1:.4f}",
+            "Rate":            f"{rate:.4f}",
+            "SP800-22":        f"{pr:.4f}"
+        })
+
+    df = pd.DataFrame(rows).set_index("Extractor")
+    st.subheader("📊 Extractor Performance on QCI Stream")
+    st.dataframe(df, use_container_width=True)
+    st.download_button(
+        "⬇️ Download QCI-Extractor Metrics as CSV",
+        df.to_csv().encode("utf-8"),
+        file_name="qci_extractor_metrics.csv"
+    )
+
 # ──────────────────────────────────────────────────────────────────────────────
 # End of dashboard.py
 # ──────────────────────────────────────────────────────────────────────────────
