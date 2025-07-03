@@ -1,0 +1,6 @@
+# book/book2/_toc.yml
+format: jb-book
+root: Introduction
+
+chapters:
+  - file: Introduction

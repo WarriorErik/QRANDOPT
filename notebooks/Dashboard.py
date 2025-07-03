@@ -1050,6 +1050,10 @@ with tab1:
 # ──────────────────────────────────────────────────────────────────────────────
 # Meta-RL Extractor
 # ──────────────────────────────────────────────────────────────────────────────
+
+import time
+import psutil
+
 with tab2:
     st.header("🤖 Meta-RL Extractor (Q-Learning)")
     st.write("Configure RL hyperparameters, train episode by episode, and compare to classical extractors.")
@@ -1065,6 +1069,10 @@ with tab2:
 
     rl_run = st.button("▶️ Train Q-Learning Agent (Meta-RL)", key="run_meta_rl")
     if rl_run:
+        proc = psutil.Process()
+        cpu_before = proc.cpu_percent(interval=None)
+        t0 = time.perf_counter()
+
         with st.spinner("🏃 Setting up RL environment…"):
             if st.session_state.uploaded_bits is not None:
                 raw_bits = st.session_state.uploaded_bits
@@ -1099,7 +1107,16 @@ with tab2:
             if ep % max(1, episodes // 10) == 0:
                 train_status.write(f"Episode {ep+1}/{episodes}  Reward = {total_r:.3f}")
 
+        t1 = time.perf_counter()
+        cpu_after = proc.cpu_percent(interval=None)
+
         train_status.success("🎉 Training complete!")
+
+        total_time = t1 - t0
+        avg_ep = total_time / episodes if episodes else 0.0
+        st.metric("⏱️ Total training time", f"{total_time:.2f} s")
+        st.metric("⚡ Avg time/episode", f"{avg_ep:.3f} s")
+        st.write(f"🖥️ Approx CPU use during training: {cpu_after - cpu_before:.1f}%")
 
         st.subheader("📈 Learning Curve")
         rewards = np.array(agent.history_rewards)
@@ -1266,9 +1283,10 @@ with tab2:
                 color_discrete_sequence=px.colors.qualitative.Set2
             )
             st.plotly_chart(fig_l, use_container_width=True)
-
     else:
         st.info("▶️ Click the button above to train the Meta-RL agent.")
+
+
 
 #___________________________________________________________________________
 #Quantum Optimization Tab using the Dirac Hardware Model
