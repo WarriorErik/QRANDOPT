@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>&lt;no title&gt; &#8212; My sample book</title>
+    <title>Chapter 8: Sidebar Controls &amp; Q-Learning &#8212; My sample book</title>
   
   
   
@@ -57,12 +57,11 @@
     <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'CoverPage';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapter_eight';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Chapter 1: Introduction to QRANDOPT Dashboard" href="Introduction.html" />
+    <link rel="next" title="Chapter 9: Conclusions and Future Work" href="chapter_nine.html" />
+    <link rel="prev" title="Chapter 7: Quantum Optimizer &amp; QCI Data Analysis" href="chapter_seven.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -125,8 +124,6 @@
       
       
       
-        
-      
       <div class="bd-sidebar-primary bd-sidebar">
         
 
@@ -145,7 +142,7 @@
     
   
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="CoverPage.html">
   
   
   
@@ -176,13 +173,13 @@
     <div class="bd-toc-item navbar-nav active">
         
         <ul class="nav bd-sidenav bd-sidenav__home-link">
-            <li class="toctree-l1 current active">
-                <a class="reference internal" href="#">
+            <li class="toctree-l1">
+                <a class="reference internal" href="CoverPage.html">
                     <no title>
                 </a>
             </li>
         </ul>
-        <ul class="nav bd-sidenav">
+        <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Chapter 1: Introduction to QRANDOPT Dashboard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Chapter_two.html">🔬 Chapter 2: Scientific Foundations of QRANDOPT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter_three.html">Chapter 3: Noise in QRANDOPT</a></li>
@@ -190,7 +187,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter_five.html">📊 Chapter 5: Simulation Experiments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter_six.html">Chapter 6: Classical Extractor Metrics &amp; Meta-RL Extractor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter_seven.html">Chapter 7: Quantum Optimizer &amp; QCI Data Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter_eight.html">Chapter 8: Sidebar Controls &amp; Q-Learning</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Chapter 8: Sidebar Controls &amp; Q-Learning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter_nine.html">Chapter 9: Conclusions and Future Work</a></li>
 </ul>
 
@@ -294,7 +291,7 @@
       
       
       
-      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2FCoverPage.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2Fchapter_eight.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -324,7 +321,7 @@
       
       
       
-      <li><a href="_sources/CoverPage.ipynb" target="_blank"
+      <li><a href="_sources/chapter_eight.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -408,11 +405,22 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1><no title></h1>
+    <h1>Chapter 8: Sidebar Controls & Q-Learning</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sidebar-controls-explained">Sidebar Controls Explained</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-effect-of-number-of-raw-bits">Example: Effect of Number of Raw Bits</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-q-learning">What is Q-Learning?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-visualizing-a-q-table-heatmap">Example: Visualizing a Q-Table Heatmap</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -422,19 +430,93 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <div style="text-align: center; font-family: 'Georgia', serif; color: #2c3e50;">
-  <h1 style="font-size: 3.5em; margin-bottom: 0;">QRANDOPT</h1>
-  <h2 style="font-size: 2em; margin-top: 0; font-weight: 300;">Quantum Randomness Optimization</h2>
-  <p style="font-size: 1.2em; margin-top: 1em;">A Unified Dashboard for Noise Modeling, Extraction, Reinforcement Learning, and Quantum Optimization</p>
-  <p style="margin-top: 2em; font-size: 1em;">
-    <strong>Erik Recinos Jr.</strong><br/>
-    Defense: July 16, 2025<br/>
-    Advisor: Dr. Andreas Marpaung
-  </p>
-  <hr style="margin: 2em auto; width: 50%; border: 1px solid #bdc3c7;"/>
+  <section class="tex2jax_ignore mathjax_ignore" id="chapter-8-sidebar-controls-q-learning">
+<h1>Chapter 8: Sidebar Controls &amp; Q-Learning<a class="headerlink" href="#chapter-8-sidebar-controls-q-learning" title="Link to this heading">#</a></h1>
+<p>Welcome to Chapter 7! In this notebook, we’ll explain what each sidebar control in the QRANDOPT dashboard does and introduce the core concepts of Q-Learning in an accessible way.</p>
+<section id="sidebar-controls-explained">
+<h2>Sidebar Controls Explained<a class="headerlink" href="#sidebar-controls-explained" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>🔢 Number of raw bits to generate</strong>: Determines how many random bits (0s and 1s) the dashboard generates for analysis. More bits give a more accurate statistical picture, but take longer to compute.</p></li>
+<li><p><strong>📦 Batch size for Aer fallback</strong>: When true quantum randomness isn’t available, the dashboard simulates quantum bits using Qiskit Aer in batches of this size.</p></li>
+<li><p><strong>📏 Minimum length for SP 800-22 tests</strong>: The NIST randomness tests require a certain minimum bit length; this slider sets that threshold.</p></li>
+<li><p><strong>🔊 Bit-flip noise probability</strong>: Simulates noise by flipping each bit with this probability, helping you see how noise affects randomness metrics.</p></li>
+</ul>
+</section>
+<section id="example-effect-of-number-of-raw-bits">
+<h2>Example: Effect of Number of Raw Bits<a class="headerlink" href="#example-effect-of-number-of-raw-bits" title="Link to this heading">#</a></h2>
+<p>Let’s see how increasing the number of raw bits smooths out the bias estimate.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_bias</span><span class="p">(</span><span class="n">num_bits</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="n">biases</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">num_bits</span><span class="p">)</span>
+        <span class="n">bias</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">bits</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">biases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">biases</span>
+
+<span class="c1"># Estimate bias for different sample sizes</span>
+<span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sizes</span><span class="p">:</span>
+    <span class="n">biases</span> <span class="o">=</span> <span class="n">estimate_bias</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">biases</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> bits&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bias Estimates vs. Number of Bits&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Trial&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Absolute Bias&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
 </div>
-<div class="toctree-wrapper compound">
 </div>
+<div class="cell_output docutils container">
+<img alt="_images/ff6b91f06e58f2528b31c12727b5c43df1994fa10d6bf47f9e5e62681800117f.png" src="_images/ff6b91f06e58f2528b31c12727b5c43df1994fa10d6bf47f9e5e62681800117f.png" />
+</div>
+</div>
+</section>
+<section id="what-is-q-learning">
+<h2>What is Q-Learning?<a class="headerlink" href="#what-is-q-learning" title="Link to this heading">#</a></h2>
+<p>Q-Learning is a type of <strong>Reinforcement Learning</strong> where an agent learns to make decisions by interacting with an environment and receiving rewards. Over time, it builds a <strong>Q-table</strong> that estimates the value of taking a certain action in a given state.</p>
+<p>Key terms:</p>
+<ul class="simple">
+<li><p><strong>State</strong>: A description of the current situation (e.g., the current bias and entropy).</p></li>
+<li><p><strong>Action</strong>: A choice the agent can make (e.g., pick a specific extractor).</p></li>
+<li><p><strong>Reward</strong>: Feedback from the environment (higher if the extracted bits are more random).</p></li>
+<li><p><strong>Q-table</strong>: A lookup table where each entry Q[state, action] estimates the expected future reward of taking that action in that state.</p></li>
+</ul>
+<p><img alt="Q-Learning Diagram" src="https://upload.wikimedia.org/wikipedia/commons/5/57/Reinforcement_learning_diagram.svg" /></p>
+<p><em>Figure: The agent interacts with the environment, choosing actions to maximize cumulative reward.</em></p>
+</section>
+<section id="example-visualizing-a-q-table-heatmap">
+<h2>Example: Visualizing a Q-Table Heatmap<a class="headerlink" href="#example-visualizing-a-q-table-heatmap" title="Link to this heading">#</a></h2>
+<p>Below is a simple illustration of a Q-table heatmap. Darker cells might represent higher expected rewards.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Create a sample Q-table</span>
+<span class="n">q_table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">q_table</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Sample Q-Table Heatmap&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Actions&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;States&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/7eb2859e127cb1335aeddab28ce8a4968a5586a0c31181f9124cb62ea220e688.png" src="_images/7eb2859e127cb1335aeddab28ce8a4968a5586a0c31181f9124cb62ea220e688.png" />
+</div>
+</div>
+</section>
+</section>
 
     <script type="text/x-thebe-config">
     {
@@ -466,12 +548,21 @@ document.write(`
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="chapter_seven.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Chapter 7: Quantum Optimizer &amp; QCI Data Analysis</p>
+      </div>
+    </a>
     <a class="right-next"
-       href="Introduction.html"
+       href="chapter_nine.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Chapter 1: Introduction to QRANDOPT Dashboard</p>
+        <p class="prev-next-title">Chapter 9: Conclusions and Future Work</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -481,6 +572,24 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sidebar-controls-explained">Sidebar Controls Explained</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-effect-of-number-of-raw-bits">Example: Effect of Number of Raw Bits</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-q-learning">What is Q-Learning?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-visualizing-a-q-table-heatmap">Example: Visualizing a Q-Table Heatmap</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

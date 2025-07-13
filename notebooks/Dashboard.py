@@ -38,6 +38,106 @@ from extractors.universal_hash import universal_hash
 from extractors.maurer_wolf    import maurer_wolf_extractor
 from utils                     import compute_bias
 
+# ──────────────────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
+# Quantum Blueprint Theme: elegant dark science console
+# ──────────────────────────────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="🧪 QRANDOPT Dashboard",
+    page_icon="🧪",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown("""
+<style>
+  /* Hide Streamlit defaults */
+  #MainMenu, footer, header { visibility: hidden; }
+
+  /* Deep scientific fractal background */
+  html, body {
+    background: url('https://images.unsplash.com/photo-1542744094-24638eff58bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')
+      no-repeat center center fixed;
+    background-size: cover;
+  }
+
+  /* Main content container */
+  [data-testid="stAppViewContainer"] {
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    background-color: rgba(15, 18, 25, 0.85) !important;
+    border-radius: 16px;
+    padding: 2rem !important;
+  }
+
+  /* Sidebar */
+  [data-testid="stSidebar"] {
+    backdrop-filter: blur(6px) saturate(130%);
+    -webkit-backdrop-filter: blur(6px) saturate(130%);
+    background-color: rgba(10, 12, 18, 0.85) !important;
+    border-radius: 12px;
+    padding: 1rem !important;
+  }
+
+  /* Headings */
+  h1, h2, h3 {
+    font-family: 'Montserrat', sans-serif !important;
+    color: #E8F1FA !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  }
+  h1 {
+    font-size: 3rem !important;
+    background: linear-gradient(135deg, #82b1ff, #448aff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Primary buttons */
+  .stButton > button {
+    background: linear-gradient(135deg, #536dfe, #448aff) !important;
+    color: #FFF !important;
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  .stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(67, 85, 239, 0.6);
+  }
+
+  /* Download buttons */
+  a.stDownloadButton > button {
+    background: #3949ab !important;
+    color: #FFF !important;
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+  }
+</style>
+
+<!-- Load Montserrat font -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<h1>🧪 QRANDOPT: Quantum/Classical Entropy Dashboard</h1>
+<p style="font-family:'Montserrat',sans-serif; color:#cfd8dc; font-size:1.05rem;">
+  An elegant scientific console for exploring quantum randomness with clarity.
+</p>
+
+Modules Overview: 
+1. 🧮 Classical Extractor Metrics – Generate/upload bitstreams; apply extractors; compare bias, rate & NIST tests.  
+2. 🤖 Meta-RL Extractor – Train Q-learning agents with live progress & 3D Q-table visualizations.  
+3. 👨‍🔬 Quantum Optimizer (Dirac-3) – Submit polynomial Hamiltonians to QCI’s qudit core; view best energies & solutions.  
+4. 📡 QCI Data Analysis – Fetch qudit streams; compute entropy & bias; benchmark extractors end-to-end.  
+""", unsafe_allow_html=True)
+
+
+
+
+
+
+
 
 
 # NIST SP 800-22 functions
@@ -409,34 +509,34 @@ class QLearningAgent:
 #  Streamlit App
 # ──────────────────────────────────────────────────────────────────────────────
 
-st.set_page_config(
-    page_title="🔬 QRANDOPT Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# st.set_page_config(
+#     page_title="🔬 QRANDOPT Dashboard",
+#     layout="wide",
+#     initial_sidebar_state="expanded"
+# )
 
-st.title("🔬 QRANDOPT: Quantum/Classical Entropy Dashboard")
-st.markdown(
-    """
-    Welcome!  
-    Below you’ll find two main tabs:
+# st.title("🔬 QRANDOPT: Quantum/Classical Entropy Dashboard")
+# st.markdown(
+#     """
+#     Welcome!  
+#     Below you’ll find two main tabs:
 
-    1. 🧮 Classical Extractor Metrics
-       - Generate or upload a bitstream (drand → Aer fallback).  
-       - Apply any combination of Von Neumann, Elias, Universal Hash, Maurer–Wolf.  
-       - Compare bias, extraction rate, NIST SP 800-22 pass rates.  
-       - New! Live Bitstream Explorer, sliding‐window entropy, autocorrelation, run‐length distribution, FFT, and more.  
-       - New! Downloadable CSV reports.  
+#     1. 🧮 Classical Extractor Metrics
+#        - Generate or upload a bitstream (drand → Aer fallback).  
+#        - Apply any combination of Von Neumann, Elias, Universal Hash, Maurer–Wolf.  
+#        - Compare bias, extraction rate, NIST SP 800-22 pass rates.  
+#        - New! Live Bitstream Explorer, sliding‐window entropy, autocorrelation, run‐length distribution, FFT, and more.  
+#        - New! Downloadable CSV reports.  
 
-    2. 🤖 Meta-RL Extractor
-       - Configure RL hyperparameters (learning rate, bias penalty, α schedule, grid size).  
-       - Train episode‐by‐episode with a live progress bar.  
-       - View learning curve and a 3D Q‐table heatmap.  
-       - Compare RL output to classical extractors side by side.  
+#     2. 🤖 Meta-RL Extractor
+#        - Configure RL hyperparameters (learning rate, bias penalty, α schedule, grid size).  
+#        - Train episode‐by‐episode with a live progress bar.  
+#        - View learning curve and a 3D Q‐table heatmap.  
+#        - Compare RL output to classical extractors side by side.  
 
-    3. ✨ Quantum Optimizer (Dirac-3)
-    """
-)
+#     3. ✨ Quantum Optimizer (Dirac-3)
+#     """
+# )
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Sidebar: Global Settings
@@ -478,7 +578,7 @@ if "raw_bits" not in st.session_state:
 if "q_table" not in st.session_state:
     st.session_state.q_table = None
 
-tab1, tab2, tab3, tab4 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor", "👨‍🔬 Quantum Optimizer", " 📡QCI Data Analysis"])
+tab1, tab2, tab3, tab4 = st.tabs(["🧮 Classical Extractor Metrics", "🤖 Meta-RL Extractor", "👨‍🔬 Quantum Optimizer", "📡QCI Data Analysis"])
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1348,9 +1448,9 @@ with tab3:
         {
           "coefficients": [1, 1, 1],
           "indices": [
-            [1, 0, 0],   // x₀
-            [0, 1, 0],   // x₁
-            [0, 0, 1]    // x₂
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
           ]
         }
         
@@ -1365,9 +1465,9 @@ with tab3:
         {
           "coefficients": [-1, -1, -1],
           "indices": [
-            [1, 1, 0],   // x₀ x₁
-            [0, 1, 1],   // x₁ x₂
-            [1, 0, 1]    // x₀ x₂
+            [1, 1, 0],   
+            [0, 1, 1],   
+            [1, 0, 1]   
           ]
         }
         
@@ -1382,9 +1482,9 @@ with tab3:
         {
           "coefficients": [2, -3, 1],
           "indices": [
-            [1, 0, 0],  // 2·x₀
-            [0, 1, 0],  // -3·x₁^2
-            [1, 0, 1]   // 1·(x₀ x₂)
+            [1, 0, 0], 
+            [0, 1, 0], 
+            [1, 0, 1]  
           ]
         }
         
@@ -1648,6 +1748,7 @@ with tab4:
         df.to_csv().encode("utf-8"),
         file_name="qci_extractor_metrics.csv"
     )
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # End of dashboard.py

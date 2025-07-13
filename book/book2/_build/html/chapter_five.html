@@ -62,6 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'chapter_five';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Chapter 6: Classical Extractor Metrics &amp; Meta-RL Extractor" href="chapter_six.html" />
     <link rel="prev" title="Chapter 4: Extraction Algorithms from Scratch" href="chapter_four.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -186,6 +187,10 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter_three.html">Chapter 3: Noise in QRANDOPT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter_four.html">Chapter 4: Extraction Algorithms from Scratch</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">📊 Chapter 5: Simulation Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter_six.html">Chapter 6: Classical Extractor Metrics &amp; Meta-RL Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter_seven.html">Chapter 7: Quantum Optimizer &amp; QCI Data Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter_eight.html">Chapter 8: Sidebar Controls &amp; Q-Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter_nine.html">Chapter 9: Conclusions and Future Work</a></li>
 </ul>
 
     </div>
@@ -497,7 +502,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/a3694c7e81e588116c5ff3e8085fc79a2559008e511bc056ac69ee63bd16c254.png" src="_images/a3694c7e81e588116c5ff3e8085fc79a2559008e511bc056ac69ee63bd16c254.png" />
+<img alt="_images/630bbd5ab87562f737db4ff7785cc5fbe5c8672a9e47210cd34c6b7f19ec3312.png" src="_images/630bbd5ab87562f737db4ff7785cc5fbe5c8672a9e47210cd34c6b7f19ec3312.png" />
 </div>
 </div>
 </section>
@@ -509,9 +514,9 @@ document.write(`
 <li><p><strong>Bias</strong> (distance from perfectly fair)</p></li>
 </ul>
 <p>Algorithms:
-$<span class="math notranslate nohighlight">\(
+<span class="math notranslate nohighlight">\(
 \mathrm{VN}(x)\;\big|\;\mathrm{Elias}(x)\;\big|\;\mathrm{UHash}(x)\;\big|\;\mathrm{Maurer\text{-}Wolf}(x)
-\)</span>$</p>
+\)</span></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -550,7 +555,7 @@ $<span class="math notranslate nohighlight">\(
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/5a695ac936125345c9e2abf5e5fa4c84381fea68fb3d30e3d20047530dfc3c96.png" src="_images/5a695ac936125345c9e2abf5e5fa4c84381fea68fb3d30e3d20047530dfc3c96.png" />
+<img alt="_images/0dd4191e10119090aa6135687ef63a43e7a6552a931daec47d3112f04ba8f0bb.png" src="_images/0dd4191e10119090aa6135687ef63a43e7a6552a931daec47d3112f04ba8f0bb.png" />
 </div>
 </div>
 </section>
@@ -558,7 +563,7 @@ $<span class="math notranslate nohighlight">\(
 <h2>3️⃣ Meta‑RL Training Dynamics<a class="headerlink" href="#metarl-training-dynamics" title="Link to this heading">#</a></h2>
 <p>We simulate a Q‑learning agent training in our extractor environment.
 The core update rule is:
-$<span class="math notranslate nohighlight">\( Q(s,a) \leftarrow Q(s,a) + \alpha \bigl[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \bigr] \)</span>$</p>
+<span class="math notranslate nohighlight">\( Q(s,a) \leftarrow Q(s,a) + \alpha \bigl[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \bigr] \)</span></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -585,7 +590,7 @@ $<span class="math notranslate nohighlight">\( Q(s,a) \leftarrow Q(s,a) + \alpha
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/2433aabd37c3565f6bf54ea645bc4d5724387a0c92b77550147d4ce0bc211113.png" src="_images/2433aabd37c3565f6bf54ea645bc4d5724387a0c92b77550147d4ce0bc211113.png" />
+<img alt="_images/86309bdab4536c486a483cb7ab1885e0f9f4cd26dfa2ed05adf4eb2aecf72aa6.png" src="_images/86309bdab4536c486a483cb7ab1885e0f9f4cd26dfa2ed05adf4eb2aecf72aa6.png" />
 </div>
 </div>
 <section id="summary">
@@ -638,6 +643,15 @@ $<span class="math notranslate nohighlight">\( Q(s,a) \leftarrow Q(s,a) + \alpha
         <p class="prev-next-subtitle">previous</p>
         <p class="prev-next-title">Chapter 4: Extraction Algorithms from Scratch</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="chapter_six.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Chapter 6: Classical Extractor Metrics &amp; Meta-RL Extractor</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
